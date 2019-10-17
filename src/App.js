@@ -1,26 +1,82 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react';
+import Header from './componentes/Header';
+import AgregarCita from './componentes/AgregarCita';
+import ListaCitas from './componentes/ListaCitas';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+//Redux
+import { Provider } from 'react-redux';
+import store from './store';
+
+class App extends Component {
+    state = {  
+        citas: []
+    }
+
+    componentDidMount() {
+        const citasLS = localStorage.getItem('citas');
+        if(citasLS) {
+            this.setState({
+                citas: JSON.parse( citasLS )
+            });
+        }
+    }
+
+    componentDidUpdate() {
+        localStorage.setItem(
+            'citas',
+            JSON.stringify(this.state.citas )
+        );
+    }
+
+    crearCita = nuevaCita => {
+        
+        const citas = [...this.state.citas, nuevaCita];
+
+        this.setState({
+            citas
+        })
+    }
+
+    borrarCita = id => {
+        console.log(id);
+        //crear el state
+        const citasActuales = [...this.state.citas];
+       
+        //borrar el elemento del state
+        const citas = citasActuales.filter(cita => cita.id !== id);
+        
+        //Actualizar el state
+        this.setState({
+            citas
+        });
+    }
+
+    render() { 
+        return (  
+            <Provider store={store}>
+                <div className="container">
+                    <Header
+                        titulo={"Administrador de Pacientes de Veterinaria"}
+                    />
+
+                    <div className="row">
+                        <div className="col-md-6">
+                            <AgregarCita
+                                crearCita={this.crearCita}
+                            />
+                        </div>
+
+                        <div className="col-md-6">
+                            <ListaCitas
+                                citas={this.state.citas}
+                                borrarCita={this.borrarCita}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </Provider>
+        );
+    }
 }
-
+ 
 export default App;
